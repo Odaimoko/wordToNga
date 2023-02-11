@@ -24,6 +24,7 @@ STYLE_NAME_TO_COLOR = {
 
 
 # 纯文本，暂不支持表格
+# 支持样式
 # 支持颜色
 # 支持加粗
 # 不支持图片
@@ -83,6 +84,7 @@ def html_as_intermediate(input_doc):
     with open(output_doc, "r", encoding = "utf8") as f:
         html_str = f.read()
     soup = BeautifulSoup(html_str, 'html.parser')
+    
     for tag in HEADER_TO_SIZE:  # Header 替换成字体大小+加粗
         for h1 in soup.select(tag):
             h1.string = "[b][size={size}]{content}[/size][/b]".format(size = HEADER_TO_SIZE[tag], content = h1.string)
@@ -92,12 +94,19 @@ def html_as_intermediate(input_doc):
     for tag in soup.select("strong"):  # 加粗
         tag.string = "[b]{content}[/b]".format(content = tag.string)
     
+    for tag in soup.select("p"):  # 将HTML里的 paragraph/段落换成 linebreak/换行，免得复制的时候一句话占两行。
+        tag.name = "br"
+    
     # 图片，无法自动插入
+    # 故意将图片换回段落，以在编辑器中有换行，更明显看出这里需要插入图片。
     for tag in soup.select("img"):
         tag.string = "【我去这里需要插入图片：{0}】".format(tag.attrs["src"])
         tag.attrs = {}
+        tag.name = "p"
     
-    html_str = soup.prettify()
+    html_str = str(soup)  # 不能prettify。 prettify会换行。
+    html_str = html_str.replace("<br>", "")
+    
     # 找到所有设置图片大小的，删除 {width="3.38125in" height="3.807638888888889in"}
     width_height_pattern = r"""\{width="\d.*in"\sheight=".*in"\}"""  # width和height中间可能是空格可能是回车
     # print(re.findall(width_height_pattern, html_str))
