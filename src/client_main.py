@@ -27,7 +27,8 @@ STYLE_NAME_TO_COLOR = {
 # 支持样式
 # 支持颜色
 # 支持加粗
-# 不支持图片
+# 支持无序列表
+# 不支持图片，有谁告诉我怎么自动上传到nga服务器？？
 
 def parse_args():
     parser = argparse.ArgumentParser(description = 'World To Nga document converter')
@@ -93,6 +94,13 @@ def html_as_intermediate(input_doc):
         tag.string = "[url={url}]{content}[/url]".format(url = tag.attrs['href'], content = tag.string)
     for tag in soup.select("strong"):  # 加粗
         tag.string = "[b]{content}[/b]".format(content = tag.string)
+    
+    for tag in soup.select("ul"):  # 无序列表
+        tag.insert_before("[list]")
+        for item in tag.select("li"):
+            item = item.next  # <li>里面还有个<p>，这个<p>会在后面变成br，所以这里不用额外加换行。
+            item.insert_before("[*]")
+        tag.insert_after(BeautifulSoup("<p>[/list]</p>", "html.parser"))  # 主动加一个<p>，最后变成换行
     
     for tag in soup.select("p"):  # 将HTML里的 paragraph/段落换成 linebreak/换行，免得复制的时候一句话占两行。
         tag.name = "br"
