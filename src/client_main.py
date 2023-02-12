@@ -81,7 +81,8 @@ def add_doc_styles_tag(input_doc):
 
 def html_as_intermediate(input_doc):
     output_doc = input_doc.with_suffix(".html")
-    subprocess.call("pandoc -i {0} -o {1}".format(input_doc, output_doc))
+    # 使用 subprocess.run 代替 call，才能在 mac 上运行
+    subprocess.run(["pandoc", "-i", input_doc, "-o", output_doc])
     with open(output_doc, "r", encoding = "utf8") as f:
         html_str = f.read()
     soup = BeautifulSoup(html_str, 'html.parser')
