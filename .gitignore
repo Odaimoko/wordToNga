@@ -139,6 +139,7 @@ cython_debug/
 
 #idea
 .idea
+.vscode
 
 # Data files
 *.docx
